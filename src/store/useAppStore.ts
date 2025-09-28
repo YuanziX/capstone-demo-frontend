@@ -5,6 +5,7 @@ export interface ViolationInstance {
   startTime: number; // timestamp
   endTime: number | null; // null if ongoing
   duration: number; // in seconds
+  details?: string; // optional field for extra info
 }
 
 // counts violations and holds instances
@@ -14,7 +15,11 @@ export interface ViolationCategory {
 }
 
 // types of violations
-export type ViolationType = "NoFace" | "MultipleFaces" | "LookingAway";
+export type ViolationType =
+  | "NoFace"
+  | "MultipleFaces"
+  | "LookingAway"
+  | "ObjectDetected";
 
 interface AppState {
   logs: { message: string; timestamp: string }[];
@@ -22,7 +27,7 @@ interface AppState {
   violations: Record<ViolationType, ViolationCategory>;
   addLog: (message: string) => void;
   setDetectorReady: (isReady: boolean) => void;
-  startViolation: (type: ViolationType) => void;
+  startViolation: (type: ViolationType, details?: string) => void;
   endViolation: (type: ViolationType) => void;
   resetViolations: () => void;
 }
@@ -31,6 +36,7 @@ const initialViolations: Record<ViolationType, ViolationCategory> = {
   NoFace: { count: 0, instances: [] },
   MultipleFaces: { count: 0, instances: [] },
   LookingAway: { count: 0, instances: [] },
+  ObjectDetected: { count: 0, instances: [] },
 };
 
 export const useAppStore = create<AppState>((set) => ({
@@ -48,7 +54,7 @@ export const useAppStore = create<AppState>((set) => ({
 
   setDetectorReady: (isReady) => set({ isDetectorReady: isReady }),
 
-  startViolation: (type) =>
+  startViolation: (type, details) =>
     set((state) => {
       const category = state.violations[type];
       const lastInstance = category.instances[category.instances.length - 1];
@@ -59,6 +65,7 @@ export const useAppStore = create<AppState>((set) => ({
           startTime: Date.now(),
           endTime: null,
           duration: 0,
+          details: details,
         };
         return {
           violations: {

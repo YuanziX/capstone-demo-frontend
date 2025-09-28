@@ -1,22 +1,32 @@
 import { useAppStore, type ViolationType } from "../store/useAppStore";
-import { AlertTriangle, User, Users, EyeOff } from "lucide-react";
+import { AlertTriangle, User, Users, EyeOff, Smartphone } from "lucide-react";
 
 const icons: Record<ViolationType, React.ReactNode> = {
   NoFace: <User size={20} className="mr-2" />,
   MultipleFaces: <Users size={20} className="mr-2" />,
   LookingAway: <EyeOff size={20} className="mr-2" />,
+  ObjectDetected: <Smartphone size={20} className="mr-2" />,
 };
 
 const ViolationTracker = () => {
   const violations = useAppStore((state) => state.violations);
 
-  const formatDuration = (startTime: number, endTime: number | null) => {
-    if (endTime === null) {
-      const elapsed = (Date.now() - startTime) / 1000;
-      return `${elapsed.toFixed(1)}s (ongoing)`;
+  const formatDuration = (instance: {
+    startTime: number;
+    endTime: number | null;
+    details?: string;
+  }) => {
+    let durationText;
+    if (instance.endTime === null) {
+      const elapsed = (Date.now() - instance.startTime) / 1000;
+      durationText = `${elapsed.toFixed(1)}s (ongoing)`;
+    } else {
+      const duration = (instance.endTime - instance.startTime) / 1000;
+      durationText = `${duration.toFixed(1)}s`;
     }
-    const duration = (endTime - startTime) / 1000;
-    return `${duration.toFixed(1)}s`;
+    return instance.details
+      ? `${durationText} - ${instance.details}`
+      : durationText;
   };
 
   return (
@@ -47,8 +57,7 @@ const ViolationTracker = () => {
               </div>
               {lastInstance && (
                 <div className="text-right text-sm text-gray-400 mt-1">
-                  Last instance:{" "}
-                  {formatDuration(lastInstance.startTime, lastInstance.endTime)}
+                  Last instance: {formatDuration(lastInstance)}
                 </div>
               )}
             </div>

@@ -5,7 +5,7 @@ import {
 } from "@mediapipe/tasks-vision";
 import { type ViolationType } from "../store/useAppStore";
 
-const LOOK_AWAY_THRESHOLD_SECONDS = 1;
+const LOOK_AWAY_THRESHOLD_SECONDS = 0.2;
 const PROHIBITED_OBJECTS = [
   "cell phone",
   "book",

@@ -1,4 +1,5 @@
 import { useEffect, forwardRef } from "react";
+import { toast } from "sonner";
 
 interface WebcamFeedProps {
   onStream: (stream: MediaStream) => void;
@@ -27,7 +28,7 @@ const WebcamFeed = forwardRef<HTMLVideoElement, WebcamFeedProps>(
           }
         } catch (err) {
           console.error("Error accessing webcam:", err);
-          alert(
+          toast.error(
             "Could not access the webcam. Please grant permission and refresh."
           );
         }

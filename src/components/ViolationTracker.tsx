@@ -1,5 +1,14 @@
 import { useAppStore, type ViolationType } from "../store/useAppStore";
-import { AlertTriangle, User, Users, EyeOff, Smartphone } from "lucide-react";
+import {
+  AlertTriangle,
+  User,
+  Users,
+  EyeOff,
+  Smartphone,
+  Clock,
+} from "lucide-react";
+import Card from "./ui/Card";
+import Badge from "./ui/Badge";
 
 const icons: Record<ViolationType, React.ReactNode> = {
   NoFace: <User size={20} className="mr-2" />,
@@ -30,41 +39,89 @@ const ViolationTracker = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl bg-gray-800 text-white rounded-lg shadow-lg p-4">
-      <h2 className="text-lg font-bold mb-3 flex items-center">
-        <AlertTriangle className="mr-2 text-yellow-400" size={20} />
-        Violation Tracker
-      </h2>
-      <div className="space-y-3">
+    <Card className="w-full max-w-2xl" variant="glass">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold text-white flex items-center drop-shadow-sm">
+          <div className="p-2 bg-yellow-500/20 rounded-lg mr-3 border border-yellow-400/20">
+            <AlertTriangle className="text-yellow-300" size={20} />
+          </div>
+          Violation Monitor
+        </h2>
+        <Badge variant="info" className="animate-pulse">
+          Live
+        </Badge>
+      </div>
+
+      <div className="space-y-4">
         {Object.entries(violations).map(([type, data]) => {
           const lastInstance = data.instances[data.instances.length - 1];
           const isOngoing = lastInstance && lastInstance.endTime === null;
           return (
-            <div
+            <Card
               key={type}
-              className={`p-3 rounded-lg transition-all ${
+              className={`transition-all duration-300 hover:scale-[1.02] ${
                 isOngoing
-                  ? "bg-red-900/50 border border-red-500"
-                  : "bg-gray-700"
+                  ? "bg-red-500/10 border-red-500/50 shadow-red-500/20"
+                  : "bg-white/5 hover:bg-white/10"
               }`}
+              padding="md"
             >
-              <div className="flex justify-between items-center font-semibold">
-                <span className="flex items-center">
-                  {icons[type as ViolationType]}
-                  {type.replace(/([A-Z])/g, " $1").trim()}
-                </span>
-                <span>Count: {data.count}</span>
-              </div>
-              {lastInstance && (
-                <div className="text-right text-sm text-gray-400 mt-1">
-                  Last instance: {formatDuration(lastInstance)}
+              <div className="flex justify-between items-start">
+                <div className="flex items-center space-x-3">
+                  <div
+                    className={`p-2 rounded-lg ${
+                      isOngoing ? "bg-red-500/20" : "bg-gray-500/20"
+                    }`}
+                  >
+                    {icons[type as ViolationType]}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-white text-sm drop-shadow-sm">
+                      {type.replace(/([A-Z])/g, " $1").trim()}
+                    </h3>
+                    {lastInstance && (
+                      <div className="flex items-center text-xs text-gray-300 mt-1">
+                        <Clock size={12} className="mr-1" />
+                        {formatDuration(lastInstance)}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
+                <div className="text-right">
+                  <Badge
+                    variant={
+                      isOngoing
+                        ? "danger"
+                        : data.count > 0
+                        ? "warning"
+                        : "default"
+                    }
+                    pulse={isOngoing}
+                    size="sm"
+                  >
+                    {data.count}
+                  </Badge>
+                  {isOngoing && (
+                    <div className="text-xs text-red-300 mt-1 font-medium drop-shadow-sm">
+                      Active
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Card>
           );
         })}
+
+        {Object.keys(violations).length === 0 && (
+          <div className="text-center py-8">
+            <div className="p-4 bg-green-500/10 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center border border-green-400/20">
+              <AlertTriangle className="text-green-300" size={24} />
+            </div>
+            <p className="text-gray-200 text-sm">No violations detected</p>
+          </div>
+        )}
       </div>
-    </div>
+    </Card>
   );
 };
 
